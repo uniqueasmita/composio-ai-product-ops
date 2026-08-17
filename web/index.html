@@ -1,0 +1,2806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Product Ops Research Agent — Composio Take-Home</title>
+
+<style>
+:root {
+    --bg: #07111f;
+    --panel: #0d1b2e;
+    --panel2: #10243a;
+    --text: #f4f7fb;
+    --muted: #91a4bb;
+    --line: rgba(255,255,255,.09);
+    --accent: #6ee7b7;
+    --accent2: #60a5fa;
+    --warning: #fbbf24;
+    --danger: #fb7185;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    background:
+        radial-gradient(circle at 85% 5%, rgba(96,165,250,.14), transparent 30%),
+        radial-gradient(circle at 10% 15%, rgba(110,231,183,.08), transparent 25%),
+        var(--bg);
+    color: var(--text);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.5;
+}
+
+a {
+    color: #93c5fd;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.container {
+    width: min(1440px, calc(100% - 48px));
+    margin: auto;
+}
+
+.hero {
+    padding: 78px 0 52px;
+}
+
+.eyebrow {
+    color: var(--accent);
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    font-size: 12px;
+    margin-bottom: 18px;
+}
+
+h1 {
+    font-size: clamp(42px, 6vw, 78px);
+    line-height: .98;
+    max-width: 1000px;
+    margin: 0 0 24px;
+    letter-spacing: -.055em;
+}
+
+.hero p {
+    color: var(--muted);
+    max-width: 800px;
+    font-size: 18px;
+}
+
+.hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 28px;
+}
+
+.pill {
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,.035);
+    border-radius: 999px;
+    padding: 8px 13px;
+    color: #c8d5e5;
+    font-size: 13px;
+}
+
+.section {
+    padding: 45px 0;
+}
+
+.section-title {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: end;
+    margin-bottom: 22px;
+}
+
+h2 {
+    font-size: 30px;
+    margin: 0;
+    letter-spacing: -.03em;
+}
+
+.section-sub {
+    color: var(--muted);
+    margin: 6px 0 0;
+    max-width: 760px;
+}
+
+.grid {
+    display: grid;
+    gap: 14px;
+}
+
+.metrics {
+    grid-template-columns: repeat(6, 1fr);
+}
+
+.card {
+    background: linear-gradient(145deg, rgba(16,36,58,.94), rgba(10,25,42,.94));
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 18px 60px rgba(0,0,0,.12);
+}
+
+.metric-number {
+    font-size: 38px;
+    font-weight: 850;
+    letter-spacing: -.05em;
+}
+
+.metric-label {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.insights {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.insight {
+    min-height: 180px;
+}
+
+.insight .number {
+    color: var(--accent);
+    font-size: 35px;
+    font-weight: 850;
+}
+
+.insight h3 {
+    margin: 8px 0;
+    font-size: 18px;
+}
+
+.insight p {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.two {
+    grid-template-columns: 1fr 1fr;
+}
+
+.bar-row {
+    margin: 17px 0;
+}
+
+.bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #c8d5e5;
+    margin-bottom: 7px;
+}
+
+.bar {
+    height: 7px;
+    background: rgba(255,255,255,.07);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.bar span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: inherit;
+}
+
+.category-grid {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.category-card {
+    border: 1px solid var(--line);
+    border-radius: 15px;
+    padding: 18px;
+    background: rgba(255,255,255,.025);
+}
+
+.category-name {
+    font-weight: 750;
+    margin-bottom: 10px;
+}
+
+.category-stats {
+    display: flex;
+    gap: 20px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.category-stats b {
+    color: var(--text);
+}
+
+.progress {
+    height: 6px;
+    margin-top: 14px;
+    background: rgba(255,255,255,.07);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.progress span {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+}
+
+.workflow {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+    align-items: stretch;
+}
+
+.step {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 15px;
+    padding: 18px;
+    position: relative;
+}
+
+.step-num {
+    color: var(--accent);
+    font-weight: 900;
+    font-size: 12px;
+}
+
+.step h3 {
+    font-size: 15px;
+    margin: 8px 0 4px;
+}
+
+.step p {
+    color: var(--muted);
+    font-size: 12px;
+    margin: 0;
+}
+
+.verification {
+    border-left: 3px solid var(--accent);
+}
+
+.verification-grid {
+    display: grid;
+    grid-template-columns: 1.2fr .8fr;
+    gap: 18px;
+}
+
+.callout {
+    background: rgba(110,231,183,.06);
+    border: 1px solid rgba(110,231,183,.18);
+    border-radius: 16px;
+    padding: 20px;
+}
+
+.callout.warning {
+    background: rgba(251,191,36,.05);
+    border-color: rgba(251,191,36,.18);
+}
+
+.callout h3 {
+    margin-top: 0;
+}
+
+.callout p {
+    color: var(--muted);
+}
+
+.table-wrap {
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: rgba(5,15,27,.65);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1500px;
+}
+
+th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #10243a;
+    color: #b9c8da;
+    text-align: left;
+    padding: 13px 12px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+td {
+    padding: 14px 12px;
+    border-top: 1px solid var(--line);
+    vertical-align: top;
+    font-size: 12px;
+    color: #c7d2e1;
+}
+
+.app-cell {
+    width: 230px;
+}
+
+.app-cell strong {
+    display: block;
+    color: white;
+    font-size: 14px;
+}
+
+.app-cell small {
+    display: block;
+    color: #758aa2;
+    line-height: 1.35;
+    margin-top: 4px;
+}
+
+.badge {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 4px 8px;
+    font-size: 10px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.badge.good {
+    color: #9af2cf;
+    background: rgba(110,231,183,.10);
+    border: 1px solid rgba(110,231,183,.20);
+}
+
+.badge.warn {
+    color: #fbd783;
+    background: rgba(251,191,36,.09);
+    border: 1px solid rgba(251,191,36,.18);
+}
+
+.badge.muted {
+    color: #a7b4c5;
+    background: rgba(255,255,255,.055);
+    border: 1px solid rgba(255,255,255,.08);
+}
+
+.badge.neutral {
+    color: #c5d3e4;
+    background: rgba(96,165,250,.08);
+    border: 1px solid rgba(96,165,250,.15);
+}
+
+.source-cell {
+    white-space: nowrap;
+}
+
+footer {
+    padding: 50px 0 70px;
+    color: #71849b;
+    font-size: 12px;
+}
+
+@media(max-width: 1050px) {
+    .metrics {
+        grid-template-columns: repeat(3,1fr);
+    }
+
+    .insights {
+        grid-template-columns: repeat(2,1fr);
+    }
+
+    .workflow {
+        grid-template-columns: repeat(3,1fr);
+    }
+}
+
+@media(max-width: 700px) {
+    .container {
+        width: min(100% - 28px, 1440px);
+    }
+
+    .metrics,
+    .insights,
+    .two,
+    .category-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .workflow {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .hero {
+        padding-top: 45px;
+    }
+}
+
+@media print {
+    body {
+        background: white;
+        color: #111;
+    }
+
+    .card,
+    .category-card,
+    .step {
+        box-shadow: none;
+    }
+
+    .table-wrap {
+        overflow: visible;
+    }
+
+    table {
+        min-width: 0;
+    }
+
+    th {
+        position: static;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header class="hero">
+    <div class="eyebrow">Composio · AI Product Ops Intern Take-Home</div>
+
+    <h1>Researching 100 apps with an agent, not a spreadsheet.</h1>
+
+    <p>
+        An evidence-first research pipeline that discovers official developer
+        documentation, extracts authentication and API access patterns,
+        identifies MCP availability, and produces a buildability verdict.
+    </p>
+
+    <div class="hero-meta">
+        <span class="pill">100 apps</span>
+        <span class="pill">10 categories</span>
+        <span class="pill">Composio web research</span>
+        <span class="pill">Gemini classification</span>
+        <span class="pill">Human verification</span>
+    </div>
+</header>
+
+
+<section class="section">
+    <div class="grid metrics">
+
+        <div class="card">
+            <div class="metric-number">100</div>
+            <div class="metric-label">Apps researched</div>
+        </div>
+
+        <div class="card">
+            <div class="metric-number">96</div>
+            <div class="metric-label">High-confidence results</div>
+        </div>
+
+        <div class="card">
+            <div class="metric-number">88</div>
+            <div class="metric-label">READY to build</div>
+        </div>
+
+        <div class="card">
+            <div class="metric-number">12</div>
+            <div class="metric-label">Needs review</div>
+        </div>
+
+        <div class="card">
+            <div class="metric-number">28</div>
+            <div class="metric-label">Official/identified MCP</div>
+        </div>
+
+        <div class="card">
+            <div class="metric-number">85</div>
+            <div class="metric-label">Self-serve paths</div>
+        </div>
+
+    </div>
+</section>
+
+
+<section class="section">
+    <div class="section-title">
+        <div>
+            <h2>The headline findings</h2>
+            <p class="section-sub">
+                The useful output is not the 100 rows. It is the pattern across them.
+            </p>
+        </div>
+    </div>
+
+    <div class="grid insights">
+
+        <div class="card insight">
+            <div class="number">95/100</div>
+            <h3>REST dominates</h3>
+            <p>
+                REST appears across the overwhelming majority of the research set,
+                making it the default integration surface.
+            </p>
+        </div>
+
+        <div class="card insight">
+            <div class="number">69/100</div>
+            <h3>OAuth2 is the leading auth pattern</h3>
+            <p>
+                OAuth2 is the most frequently observed authentication method,
+                especially across SaaS and productivity platforms.
+            </p>
+        </div>
+
+        <div class="card insight">
+            <div class="number">74/100</div>
+            <h3>Most are self-serve</h3>
+            <p>
+                Free or trial access provides a practical developer path for
+                74 of the 100 apps.
+            </p>
+        </div>
+
+        <div class="card insight">
+            <div class="number">28/100</div>
+            <h3>MCP is emerging</h3>
+            <p>
+                MCP is already present across a meaningful subset, but discovery
+                is less reliable than conventional API/auth research.
+            </p>
+        </div>
+
+    </div>
+</section>
+
+
+<section class="section">
+    <div class="grid two">
+
+        <div class="card">
+            <h2>Authentication</h2>
+            <p class="section-sub">
+                An app can expose multiple authentication methods, so counts
+                represent observed methods rather than mutually exclusive apps.
+            </p>
+
+            
+    <div class="bar-row">
+        <div class="bar-label">
+            <span>OAuth2</span>
+            <b>69</b>
+        </div>
+        <div class="bar">
+            <span style="width:69%"></span>
+        </div>
+    </div>
+    
+
+    <div class="bar-row">
+        <div class="bar-label">
+            <span>Bearer Token</span>
+            <b>53</b>
+        </div>
+        <div class="bar">
+            <span style="width:53%"></span>
+        </div>
+    </div>
+    
+
+    <div class="bar-row">
+        <div class="bar-label">
+            <span>API Key</span>
+            <b>22</b>
+        </div>
+        <div class="bar">
+            <span style="width:22%"></span>
+        </div>
+    </div>
+    
+
+    <div class="bar-row">
+        <div class="bar-label">
+            <span>Basic Auth</span>
+            <b>18</b>
+        </div>
+        <div class="bar">
+            <span style="width:18%"></span>
+        </div>
+    </div>
+    
+
+    <div class="bar-row">
+        <div class="bar-label">
+            <span>JWT</span>
+            <b>7</b>
+        </div>
+        <div class="bar">
+            <span style="width:7%"></span>
+        </div>
+    </div>
+    
+
+    <div class="bar-row">
+        <div class="bar-label">
+            <span>Other</span>
+            <b>6</b>
+        </div>
+        <div class="bar">
+            <span style="width:6%"></span>
+        </div>
+    </div>
+    
+        </div>
+
+        <div class="card">
+            <h2>API surface</h2>
+            <p class="section-sub">
+                REST is the dominant integration surface; some apps expose
+                GraphQL, SDKs, CLI or other interfaces alongside it.
+            </p>
+
+            
+    <div class="bar-row">
+        <div class="bar-label">
+            <span>REST</span>
+            <b>95</b>
+        </div>
+        <div class="bar">
+            <span style="width:95%"></span>
+        </div>
+    </div>
+    
+
+    <div class="bar-row">
+        <div class="bar-label">
+            <span>GraphQL</span>
+            <b>9</b>
+        </div>
+        <div class="bar">
+            <span style="width:9%"></span>
+        </div>
+    </div>
+    
+
+    <div class="bar-row">
+        <div class="bar-label">
+            <span>SDK</span>
+            <b>9</b>
+        </div>
+        <div class="bar">
+            <span style="width:9%"></span>
+        </div>
+    </div>
+    
+
+    <div class="bar-row">
+        <div class="bar-label">
+            <span>Other</span>
+            <b>5</b>
+        </div>
+        <div class="bar">
+            <span style="width:5%"></span>
+        </div>
+    </div>
+    
+
+    <div class="bar-row">
+        <div class="bar-label">
+            <span>gRPC</span>
+            <b>3</b>
+        </div>
+        <div class="bar">
+            <span style="width:3%"></span>
+        </div>
+    </div>
+    
+
+    <div class="bar-row">
+        <div class="bar-label">
+            <span>CLI</span>
+            <b>3</b>
+        </div>
+        <div class="bar">
+            <span style="width:3%"></span>
+        </div>
+    </div>
+    
+        </div>
+
+    </div>
+</section>
+
+
+<section class="section">
+    <div class="grid two">
+
+        <div class="card">
+            <h2>Developer access</h2>
+            <p class="section-sub">
+                Self-serve access is the biggest source of easy wins.
+                Gated access is a product-ops/outreach problem, not necessarily
+                an API problem.
+            </p>
+
+            
+    <div class="bar-row">
+        <div class="bar-label">
+            <span>Free self-serve</span>
+            <b>68</b>
+        </div>
+        <div class="bar">
+            <span style="width:68%"></span>
+        </div>
+    </div>
+    
+
+    <div class="bar-row">
+        <div class="bar-label">
+            <span>Trial self-serve</span>
+            <b>6</b>
+        </div>
+        <div class="bar">
+            <span style="width:6%"></span>
+        </div>
+    </div>
+    
+
+    <div class="bar-row">
+        <div class="bar-label">
+            <span>Paid self-serve</span>
+            <b>11</b>
+        </div>
+        <div class="bar">
+            <span style="width:11%"></span>
+        </div>
+    </div>
+    
+
+    <div class="bar-row">
+        <div class="bar-label">
+            <span>Partner/contact-sales</span>
+            <b>9</b>
+        </div>
+        <div class="bar">
+            <span style="width:9%"></span>
+        </div>
+    </div>
+    
+
+    <div class="bar-row">
+        <div class="bar-label">
+            <span>Admin approval</span>
+            <b>2</b>
+        </div>
+        <div class="bar">
+            <span style="width:2%"></span>
+        </div>
+    </div>
+    
+
+    <div class="bar-row">
+        <div class="bar-label">
+            <span>Unknown</span>
+            <b>4</b>
+        </div>
+        <div class="bar">
+            <span style="width:4%"></span>
+        </div>
+    </div>
+    
+        </div>
+
+        <div class="card">
+            <h2>Easy wins vs. outreach</h2>
+
+            <div class="callout">
+                <h3>Easy wins</h3>
+                <p>
+                    Apps with a broad public API, usable credentials and a
+                    self-serve path can generally move directly into toolkit
+                    implementation.
+                </p>
+            </div>
+
+            <br>
+
+            <div class="callout warning">
+                <h3>Needs outreach / review</h3>
+                <p>
+                    Partner/contact-sales gates, admin approval, unclear access
+                    requirements and incomplete MCP evidence are the main
+                    reasons to pause before implementation.
+                </p>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+<section class="section">
+    <div class="section-title">
+        <div>
+            <h2>Category view</h2>
+            <p class="section-sub">
+                Every category contains ten apps. The comparison shows where
+                implementation readiness and MCP adoption concentrate.
+            </p>
+        </div>
+    </div>
+
+    <div class="grid category-grid">
+        
+    <div class="category-card">
+        <div class="category-name">CRM and Sales</div>
+        <div class="category-stats">
+            <span><b>9/10</b> ready</span>
+            <span><b>2</b> MCP</span>
+        </div>
+        <div class="progress">
+            <span style="width:90%"></span>
+        </div>
+    </div>
+    
+
+    <div class="category-card">
+        <div class="category-name">Support and Helpdesk</div>
+        <div class="category-stats">
+            <span><b>9/10</b> ready</span>
+            <span><b>4</b> MCP</span>
+        </div>
+        <div class="progress">
+            <span style="width:90%"></span>
+        </div>
+    </div>
+    
+
+    <div class="category-card">
+        <div class="category-name">Communications and Messaging</div>
+        <div class="category-stats">
+            <span><b>10/10</b> ready</span>
+            <span><b>1</b> MCP</span>
+        </div>
+        <div class="progress">
+            <span style="width:100%"></span>
+        </div>
+    </div>
+    
+
+    <div class="category-card">
+        <div class="category-name">Marketing Ads Email and Social</div>
+        <div class="category-stats">
+            <span><b>7/10</b> ready</span>
+            <span><b>1</b> MCP</span>
+        </div>
+        <div class="progress">
+            <span style="width:70%"></span>
+        </div>
+    </div>
+    
+
+    <div class="category-card">
+        <div class="category-name">Ecommerce</div>
+        <div class="category-stats">
+            <span><b>8/10</b> ready</span>
+            <span><b>1</b> MCP</span>
+        </div>
+        <div class="progress">
+            <span style="width:80%"></span>
+        </div>
+    </div>
+    
+
+    <div class="category-card">
+        <div class="category-name">Data SEO and Scraping</div>
+        <div class="category-stats">
+            <span><b>8/10</b> ready</span>
+            <span><b>5</b> MCP</span>
+        </div>
+        <div class="progress">
+            <span style="width:80%"></span>
+        </div>
+    </div>
+    
+
+    <div class="category-card">
+        <div class="category-name">Developer Infra and Data</div>
+        <div class="category-stats">
+            <span><b>10/10</b> ready</span>
+            <span><b>2</b> MCP</span>
+        </div>
+        <div class="progress">
+            <span style="width:100%"></span>
+        </div>
+    </div>
+    
+
+    <div class="category-card">
+        <div class="category-name">Productivity and Project Management</div>
+        <div class="category-stats">
+            <span><b>10/10</b> ready</span>
+            <span><b>4</b> MCP</span>
+        </div>
+        <div class="progress">
+            <span style="width:100%"></span>
+        </div>
+    </div>
+    
+
+    <div class="category-card">
+        <div class="category-name">Finance and Fintech</div>
+        <div class="category-stats">
+            <span><b>8/10</b> ready</span>
+            <span><b>3</b> MCP</span>
+        </div>
+        <div class="progress">
+            <span style="width:80%"></span>
+        </div>
+    </div>
+    
+
+    <div class="category-card">
+        <div class="category-name">AI Research and Media</div>
+        <div class="category-stats">
+            <span><b>9/10</b> ready</span>
+            <span><b>5</b> MCP</span>
+        </div>
+        <div class="progress">
+            <span style="width:90%"></span>
+        </div>
+    </div>
+    
+    </div>
+</section>
+
+
+<section class="section">
+    <div class="section-title">
+        <div>
+            <h2>How the agent works</h2>
+            <p class="section-sub">
+                Evidence is collected first. Classification happens only after
+                the research layer has produced source-backed material.
+            </p>
+        </div>
+    </div>
+
+    <div class="workflow">
+
+        <div class="step">
+            <div class="step-num">01</div>
+            <h3>Input</h3>
+            <p>100 apps across 10 categories.</p>
+        </div>
+
+        <div class="step">
+            <div class="step-num">02</div>
+            <h3>Discover</h3>
+            <p>Composio discovers web research tools.</p>
+        </div>
+
+        <div class="step">
+            <div class="step-num">03</div>
+            <h3>Search</h3>
+            <p>Search official API, auth, pricing and MCP documentation.</p>
+        </div>
+
+        <div class="step">
+            <div class="step-num">04</div>
+            <h3>Fetch</h3>
+            <p>Fetch candidate pages and preserve evidence URLs.</p>
+        </div>
+
+        <div class="step">
+            <div class="step-num">05</div>
+            <h3>Classify</h3>
+            <p>Gemini converts evidence into structured research records.</p>
+        </div>
+
+        <div class="step">
+            <div class="step-num">06</div>
+            <h3>Verify</h3>
+            <p>Human review checks a sample and corrects weak findings.</p>
+        </div>
+
+    </div>
+</section>
+
+
+<section class="section">
+    <div class="grid verification-grid">
+
+        <div class="card verification">
+            <h2>Verification: where the agent needed a human</h2>
+
+            <p class="section-sub">
+                A fixed 20-app sample was reviewed against first-party
+                documentation. The goal was not to manufacture a 100% score,
+                but to identify failure modes and improve the research loop.
+            </p>
+
+            <div class="callout">
+                <h3>Observed failure mode: MCP discovery</h3>
+                <p>
+                    Conventional API/auth research was generally strong.
+                    MCP was harder because first-party MCP documentation can
+                    live outside the main API reference and may be described
+                    as beta, hosted, remote or AI tooling.
+                </p>
+            </div>
+
+            <br>
+
+            <div class="callout warning">
+                <h3>Concrete correction: Airtable</h3>
+                <p>
+                    The agent initially classified Airtable as
+                    <b>MCP = No</b>. Human verification found an official
+                    Airtable MCP server and the verified dataset was corrected
+                    to <b>MCP = Yes</b>.
+                </p>
+            </div>
+
+        </div>
+
+        <div class="card">
+            <h2>Verification loop</h2>
+
+            <div class="bar-row">
+                <div class="bar-label">
+                    <span>Research pass</span>
+                    <b>100/100</b>
+                </div>
+                <div class="bar">
+                    <span style="width:100%"></span>
+                </div>
+            </div>
+
+            <div class="bar-row">
+                <div class="bar-label">
+                    <span>Human sample</span>
+                    <b>20 apps</b>
+                </div>
+                <div class="bar">
+                    <span style="width:20%"></span>
+                </div>
+            </div>
+
+            <p style="color:var(--muted);font-size:13px;margin-top:25px">
+                Important: confidence is not treated as accuracy. The final
+                case study preserves the original output and separately stores
+                the human-reviewed dataset.
+            </p>
+
+            <p style="color:var(--muted);font-size:13px">
+                First-pass output:
+                <code>research_results_first_pass.json</code>
+            </p>
+
+            <p style="color:var(--muted);font-size:13px">
+                Verified output:
+                <code>research_results_verified.json</code>
+            </p>
+        </div>
+
+    </div>
+</section>
+
+
+<section class="section">
+    <div class="section-title">
+        <div>
+            <h2>100-app research matrix</h2>
+            <p class="section-sub">
+                Every row is backed by evidence URLs collected during the
+                research process. Open the sources to inspect the underlying
+                documentation.
+            </p>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>App</th>
+                    <th>Category</th>
+                    <th>Auth</th>
+                    <th>Access</th>
+                    <th>API</th>
+                    <th>MCP</th>
+                    <th>Buildability</th>
+                    <th>Confidence</th>
+                    <th>Evidence</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                
+    <tr>
+        <td class="app-cell">
+            <strong>Salesforce</strong>
+            <small>Salesforce is a comprehensive CRM platform that provides extensive REST, SOAP, and gRPC-based APIs for managing customer data, business processes, and platform services.</small>
+        </td>
+        <td>CRM and Sales</td>
+        <td>OAuth2, Basic Auth</td>
+        <td><span class="badge warn">Paid self-serve</span></td>
+        <td>REST, SOAP, gRPC</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://help.salesforce.com/s/articleView?id=remoteaccess_oauth_tokens_scopes.htm&amp;language=en_US&amp;type=5" target="_blank" rel="noopener">source ↗</a> <a href="https://developer.salesforce.com/docs/platform/pub-sub-api/guide/supported-auth.html" target="_blank" rel="noopener">source ↗</a> <a href="https://developer.salesforce.com/blogs/2024/02/invoke-rest-apis-with-the-salesforce-integration-user-and-oauth-client-credentials" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>HubSpot</strong>
+            <small>HubSpot provides a CRM platform with extensive APIs for managing business data and automations.</small>
+        </td>
+        <td>CRM and Sales</td>
+        <td>OAuth2, Bearer Token</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developers.hubspot.com/docs/apps/developer-platform/build-apps/authentication/overview" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.hubspot.com/docs/api-reference/latest/overview" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Pipedrive</strong>
+            <small>Pipedrive is a sales CRM offering a RESTful API for managing pipelines, deals, and contacts.</small>
+        </td>
+        <td>CRM and Sales</td>
+        <td>OAuth2, API Key</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://pipedrive.readme.io/docs/core-api-concepts-authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://pipedrive.readme.io/docs/marketplace-oauth-api" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Attio</strong>
+            <small>Attio is a flexible CRM platform providing a REST API for data management.</small>
+        </td>
+        <td>CRM and Sales</td>
+        <td>OAuth2, Bearer Token, Basic Auth</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.attio.com/rest-api/guides/authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://attio.com/help/reference/apps/generating-an-api-key" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Twenty</strong>
+            <small>Twenty is an open-source CRM with auto-generated REST and GraphQL APIs based on workspace schemas.</small>
+        </td>
+        <td>CRM and Sales</td>
+        <td>OAuth2, API Key, JWT</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST, GraphQL</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.twenty.com/developers/extend/oauth" target="_blank" rel="noopener">source ↗</a> <a href="https://twentyhq-twenty.mintlify.app/developers/api/authentication" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Podio</strong>
+            <small>Podio is a work management and collaboration platform with a comprehensive REST API.</small>
+        </td>
+        <td>CRM and Sales</td>
+        <td>OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://podio.github.io/podio-js/authentication/" target="_blank" rel="noopener">source ↗</a> <a href="https://apis.io/apis/podio/podio-oauth-api/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Zoho CRM</strong>
+            <small>Zoho CRM provides a robust API for managing customer records and sales automation through OAuth and API Key authentication.</small>
+        </td>
+        <td>CRM and Sales</td>
+        <td>OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://www.zoho.com/crm/developer/docs/api/v8/oauth-overview.html" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.catalyst.zoho.com/en/ai-toolkit/catalyst-mcp-server/overview/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Close</strong>
+            <small>Close is a CRM platform with a REST API for managing sales leads and interactions.</small>
+        </td>
+        <td>CRM and Sales</td>
+        <td>API Key, OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developer.close.com/topics/authentication/" target="_blank" rel="noopener">source ↗</a> <a href="https://help.close.com/docs/api-keys-oauth" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Copper</strong>
+            <small>Copper is a CRM designed for G-Suite users with REST API access for custom integrations.</small>
+        </td>
+        <td>CRM and Sales</td>
+        <td>API Key, OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge warn">READY_WITH_REVIEW</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developer.copper.com/introduction/authentication.html" target="_blank" rel="noopener">source ↗</a> <a href="https://developer.copper.com/introduction/oauth/index.html" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>DealCloud</strong>
+            <small>DealCloud is a CRM and sales platform that provides REST APIs for managing data, users, and publications.</small>
+        </td>
+        <td>CRM and Sales</td>
+        <td>OAuth2, API Key</td>
+        <td><span class="badge muted">Unknown</span></td>
+        <td>REST</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://api.docs.dealcloud.com/docs/token" target="_blank" rel="noopener">source ↗</a> <a href="https://api.docs.dealcloud.com/docs/apikeys" target="_blank" rel="noopener">source ↗</a> <a href="https://api.docs.dealcloud.com/docs" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Zendesk</strong>
+            <small>Zendesk is a support and helpdesk platform offering REST API capabilities for service integration.</small>
+        </td>
+        <td>Support and Helpdesk</td>
+        <td>OAuth2, Basic Auth, Bearer Token</td>
+        <td><span class="badge muted">Unknown</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developer.zendesk.com/documentation/authentication/" target="_blank" rel="noopener">source ↗</a> <a href="https://developer.zendesk.com/api-reference/introduction/security-and-auth/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Intercom</strong>
+            <small>Intercom is a customer support and messaging platform with a comprehensive REST API for private and public integrations.</small>
+        </td>
+        <td>Support and Helpdesk</td>
+        <td>OAuth2, Bearer Token</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://intercom-developer-hub.readme.io/docs/personal-access-tokens" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.intercom.com/docs/build-an-integration/learn-more/authentication" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Freshdesk</strong>
+            <small>Freshdesk is a support and helpdesk solution offering extensive API access for ticket and agent management.</small>
+        </td>
+        <td>Support and Helpdesk</td>
+        <td>Basic Auth, OAuth2</td>
+        <td><span class="badge good">Trial self-serve</span></td>
+        <td>REST, SDK</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developer.freshdesk.com/api/" target="_blank" rel="noopener">source ↗</a> <a href="https://support.freshdesk.com/support/solutions/articles/225435-where-can-i-find-my-api-key-" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Front</strong>
+            <small>Front is a customer communication platform providing a comprehensive Core API for managing helpdesk entities.</small>
+        </td>
+        <td>Support and Helpdesk</td>
+        <td>OAuth2, Bearer Token</td>
+        <td><span class="badge good">Trial self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://dev.frontapp.com/docs/authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://dev.frontapp.com/docs/oauth" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Pylon</strong>
+            <small>Pylon is a B2B customer support platform offering robust API and MCP capabilities for programmatic data access.</small>
+        </td>
+        <td>Support and Helpdesk</td>
+        <td>OAuth2, Bearer Token</td>
+        <td><span class="badge muted">Partner/contact-sales</span></td>
+        <td>REST</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.usepylon.com/pylon-docs/developer/api/authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://support.usepylon.com/articles/2407390554-connecting-to-the-pylon-mcp-server" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>LiveAgent</strong>
+            <small>LiveAgent is a help desk and live chat platform providing REST APIs for automation and integration.</small>
+        </td>
+        <td>Support and Helpdesk</td>
+        <td>Bearer Token, OAuth2</td>
+        <td><span class="badge good">Trial self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://support.liveagent.com/647358-MCP-Integration-for-Agents" target="_blank" rel="noopener">source ↗</a> <a href="https://faq.liveagent.com/535002-LiveAgent-API-v1-vs-v3-Authentication-Differences-API-Key-Management-and-Resolving-403-Errors" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Plain</strong>
+            <small>Plain is a modern customer support platform with a comprehensive GraphQL API for deep integration.</small>
+        </td>
+        <td>Support and Helpdesk</td>
+        <td>Bearer Token, OAuth2, mutualTLS</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>GraphQL</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://www.plain.com/docs/graphql/authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://plain.support.site/article/mcp-server" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Help Scout</strong>
+            <small>Help Scout is a customer support platform that provides REST APIs for managing inboxes and documentation.</small>
+        </td>
+        <td>Support and Helpdesk</td>
+        <td>OAuth2, Basic Auth</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developer.helpscout.com/mailbox-api/overview/authentication/" target="_blank" rel="noopener">source ↗</a> <a href="https://developer.helpscout.com/docs-api/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Gorgias</strong>
+            <small>Gorgias is a helpdesk platform providing REST APIs for accessing helpdesk data programmatically.</small>
+        </td>
+        <td>Support and Helpdesk</td>
+        <td>API Key, OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developers.gorgias.com/reference/authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.gorgias.com/en-US/rest-api-208286" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Gladly</strong>
+            <small>Gladly is a customer service platform that provides REST and Lookup APIs for managing customer and interaction data.</small>
+        </td>
+        <td>Support and Helpdesk</td>
+        <td>Basic Auth</td>
+        <td><span class="badge muted">Partner/contact-sales</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge warn">READY_WITH_REVIEW</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developer.gladly.com/rest/" target="_blank" rel="noopener">source ↗</a> <a href="https://help.gladly.com/developer-tutorials/docs/setup-and-testing" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Slack</strong>
+            <small>Slack is a messaging and collaboration platform offering extensive Web APIs for integrations.</small>
+        </td>
+        <td>Communications and Messaging</td>
+        <td>OAuth2, Bearer Token</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.slack.dev/apis/web-api/" target="_blank" rel="noopener">source ↗</a> <a href="http://docs.slack.dev/authentication/installing-with-oauth" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Twilio</strong>
+            <small>Twilio is a communications platform providing REST APIs for voice, messaging, and authentication management.</small>
+        </td>
+        <td>Communications and Messaging</td>
+        <td>Basic Auth, OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://www.twilio.com/docs/iam/api" target="_blank" rel="noopener">source ↗</a> <a href="https://www.twilio.com/docs/iam/oauth-apps/overview" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Zoho Cliq</strong>
+            <small>Zoho Cliq provides REST APIs for platform and communication integrations using OAuth 2.0.</small>
+        </td>
+        <td>Communications and Messaging</td>
+        <td>OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://www.zoho.com/cliq/help/restapi/v3/introduction/" target="_blank" rel="noopener">source ↗</a> <a href="https://www.zoho.com/cliq/help/restapi/v3/oauth/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Lark</strong>
+            <small>Lark provides an open platform with REST APIs for messaging and application automation.</small>
+        </td>
+        <td>Communications and Messaging</td>
+        <td>Bearer Token</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://open.larksuite.com/document/ukTMukTMukTM/uMTNz4yM1MjLzUzM" target="_blank" rel="noopener">source ↗</a> <a href="https://open.larksuite.com/document/home/introduction-to-scope-and-authorization/access-credentials" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Pumble</strong>
+            <small>Pumble provides a REST API for messaging and chat integrations.</small>
+        </td>
+        <td>Communications and Messaging</td>
+        <td>API Key, OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.pumble.com/#description/api-endpoints-usage" target="_blank" rel="noopener">source ↗</a> <a href="https://pumble.com/help/integrations/automation-workflow-integrations/api-keys-integration/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Discord</strong>
+            <small>Discord is a communication platform offering a REST API for bot interactions and user-authorized actions.</small>
+        </td>
+        <td>Communications and Messaging</td>
+        <td>Bot Token, OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST, Other</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.discord.com/developers/reference" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.discord.com/developers/bots/overview" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Telegram</strong>
+            <small>Telegram provides various APIs for building bots and customized messaging clients.</small>
+        </td>
+        <td>Communications and Messaging</td>
+        <td>Other</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST, Other</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://core.telegram.org/api/" target="_blank" rel="noopener">source ↗</a> <a href="https://core.telegram.org/api/obtaining_api_id" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>WhatsApp Business</strong>
+            <small>WhatsApp Business Platform provides enterprise-grade APIs for messaging and calling automation.</small>
+        </td>
+        <td>Communications and Messaging</td>
+        <td>Bearer Token</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developers.facebook.com/docs/whatsapp/" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.facebook.com/docs/whatsapp/cloud-api/get-started/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Aircall</strong>
+            <small>Aircall is a cloud-based phone system providing a REST API and AI capabilities for integrations.</small>
+        </td>
+        <td>Communications and Messaging</td>
+        <td>Basic Auth, OAuth2</td>
+        <td><span class="badge muted">Partner/contact-sales</span></td>
+        <td>REST</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developer.aircall.io/docs/authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://developer.aircall.io/docs/best-practices" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Vonage</strong>
+            <small>Vonage offers a suite of APIs for communication channels including SMS, voice, and video.</small>
+        </td>
+        <td>Communications and Messaging</td>
+        <td>Basic Auth, JWT</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developer.vonage.com/en/getting-started/concepts/authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://developer.vonage.com/en/verify/concepts/authentication" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Google Ads</strong>
+            <small>Google Ads API allows for programmatic management of advertising campaigns and data.</small>
+        </td>
+        <td>Marketing Ads Email and Social</td>
+        <td>OAuth2, Bearer Token</td>
+        <td><span class="badge muted">Partner/contact-sales</span></td>
+        <td>REST, gRPC</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge warn">READY_WITH_REVIEW</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developers.google.com/google-ads/api/docs/get-started/dev-token" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.google.com/google-ads/api/rest/auth" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Meta Ads</strong>
+            <small>Meta Marketing API provides programmatic access to manage ad campaigns, assets, and analytics.</small>
+        </td>
+        <td>Marketing Ads Email and Social</td>
+        <td>Bearer Token</td>
+        <td><span class="badge muted">Partner/contact-sales</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge warn">READY_WITH_REVIEW</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developers.facebook.com/docs/marketing-api/get-started/authentication/" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.facebook.com/docs/marketing-api/get-started/authorization/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>LinkedIn Ads</strong>
+            <small>LinkedIn Marketing APIs provide tools to manage and analyze B2B advertising campaigns.</small>
+        </td>
+        <td>Marketing Ads Email and Social</td>
+        <td>OAuth2</td>
+        <td><span class="badge muted">Partner/contact-sales</span></td>
+        <td>REST</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge warn">READY_WITH_REVIEW</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developer.linkedin.com/product-catalog/marketing/advertising-api" target="_blank" rel="noopener">source ↗</a> <a href="https://github.com/Nuraveda-Labs/linkedin-ads-mcp" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>GoHighLevel</strong>
+            <small>A comprehensive CRM and marketing automation platform for agencies and businesses.</small>
+        </td>
+        <td>Marketing Ads Email and Social</td>
+        <td>OAuth2, Private Integration Token (PIT)</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://www.gohighlevel.com/post/deprecating-the-highlevel-api-v1-and-migrating-to-v2" target="_blank" rel="noopener">source ↗</a> <a href="https://help.gohighlevel.com/support/solutions/articles/155000003054-private-integrations-everything-you-need-to-know" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.gohighlevel.com/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Mailchimp</strong>
+            <small>An all-in-one marketing platform for email campaigns, audience management, and automation.</small>
+        </td>
+        <td>Marketing Ads Email and Social</td>
+        <td>OAuth2, API Key</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://mailchimp.com/developer/marketing/docs/fundamentals/" target="_blank" rel="noopener">source ↗</a> <a href="https://mailchimp.com/developer/marketing/guides/quick-start/" target="_blank" rel="noopener">source ↗</a> <a href="https://mailchimp.com/developer/marketing/docs/integrations/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Klaviyo</strong>
+            <small>A marketing automation platform providing email, SMS, and data-driven marketing tools.</small>
+        </td>
+        <td>Marketing Ads Email and Social</td>
+        <td>OAuth2, Private Key, Public Key</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developers.klaviyo.com/en/docs/authenticate_" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.klaviyo.com/en/docs/set_up_oauth" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.klaviyo.com/en/v2024-07-15/docs/retrieve_api_credentials" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>systeme.io</strong>
+            <small>An all-in-one platform for sales funnels, email marketing, and course hosting.</small>
+        </td>
+        <td>Marketing Ads Email and Social</td>
+        <td>Other</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developer.systeme.io/reference/api" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.nexla.com/user-guides/connectors/systeme_api" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Pinterest</strong>
+            <small>A visual discovery engine and social platform for ad campaign and content management.</small>
+        </td>
+        <td>Marketing Ads Email and Social</td>
+        <td>OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developers.pinterest.com/docs/getting-started/authentication/" target="_blank" rel="noopener">source ↗</a> <a href="https://github.com/pinterest/api-quickstart/" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.pinterest.com/docs/developer-tools/sandbox/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Threads</strong>
+            <small>A social media platform API for publishing content, managing replies, and accessing insights.</small>
+        </td>
+        <td>Marketing Ads Email and Social</td>
+        <td>OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developers.facebook.com/docs/threads/get-started/get-access-tokens-and-permissions/" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.facebook.com/docs/threads/get-started/" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.facebook.com/docs/development/create-an-app/threads-use-case/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>SendGrid</strong>
+            <small>A cloud-based email delivery platform that provides REST APIs for sending and managing emails, marketing campaigns, and contact lists.</small>
+        </td>
+        <td>Marketing Ads Email and Social</td>
+        <td>API Key, Bearer Token</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.sendgrid.com/api-reference/api-keys/retrieve-an-existing-api-key" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.sendgrid.com/api-reference/account-provisioning-api/account-provisioning-api-overview" target="_blank" rel="noopener">source ↗</a> <a href="https://github.com/sendgrid/sendgrid-nodejs" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Shopify</strong>
+            <small>An ecommerce platform offering extensive REST and GraphQL APIs for managing stores, products, orders, and customer data.</small>
+        </td>
+        <td>Ecommerce</td>
+        <td>OAuth2, Bearer Token</td>
+        <td><span class="badge warn">Paid self-serve</span></td>
+        <td>REST, GraphQL</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://shopify.dev/docs/api/usage/authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://shopify.dev/docs/apps/build/authentication-authorization/client-secrets" target="_blank" rel="noopener">source ↗</a> <a href="https://shopify.dev/docs/apps/build/authentication-authorization/access-tokens/token-exchange" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>WooCommerce</strong>
+            <small>A WordPress-based ecommerce plugin providing a REST API for store management, including products, orders, and coupons.</small>
+        </td>
+        <td>Ecommerce</td>
+        <td>Basic Auth, OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developer.woocommerce.com/docs/apis/rest-api/authentication/" target="_blank" rel="noopener">source ↗</a> <a href="https://woocommerce.github.io/woocommerce-rest-api-docs/v3.html" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>BigCommerce</strong>
+            <small>An ecommerce platform providing a comprehensive suite of REST and GraphQL APIs for store management and headless commerce.</small>
+        </td>
+        <td>Ecommerce</td>
+        <td>OAuth2, Bearer Token</td>
+        <td><span class="badge warn">Paid self-serve</span></td>
+        <td>REST, GraphQL</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.bigcommerce.com/developer/docs/overview/api-fundamentals/api-accounts" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.bigcommerce.com/developer/docs/integrations/apps/guide/auth" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.bigcommerce.com/developer/api-reference/about-our-apis" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Salesforce Commerce Cloud</strong>
+            <small>A commerce platform offering B2C APIs (SCAPI) secured via Account Manager or SLAS for shopper and administrative interactions.</small>
+        </td>
+        <td>Ecommerce</td>
+        <td>OAuth2, JWT</td>
+        <td><span class="badge muted">Partner/contact-sales</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge warn">READY_WITH_REVIEW</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developer.salesforce.com/docs/commerce/commerce-api/guide/authorization.html" target="_blank" rel="noopener">source ↗</a> <a href="https://developer.salesforce.com/docs/commerce/commerce-api/guide/authorization-for-admin-apis.html" target="_blank" rel="noopener">source ↗</a> <a href="https://developer.salesforce.com/docs/commerce/commerce-api/guide/authorization-for-shopper-apis.html" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Magento Adobe Commerce</strong>
+            <small>An ecommerce solution offering REST and GraphQL APIs, with different authentication methods depending on whether it is an on-premises/PaaS or Cloud/SaaS deployment.</small>
+        </td>
+        <td>Ecommerce</td>
+        <td>OAuth2, Bearer Token, Basic Auth</td>
+        <td><span class="badge warn">Paid self-serve</span></td>
+        <td>REST, GraphQL</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developer.adobe.com/commerce/webapi/get-started/authentication/" target="_blank" rel="noopener">source ↗</a> <a href="https://developer.adobe.com/commerce/webapi/rest/authentication/" target="_blank" rel="noopener">source ↗</a> <a href="https://developer.adobe.com/commerce/webapi/get-started/authentication/gs-authentication-oauth" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Squarespace</strong>
+            <small>Squarespace provides commerce APIs for managing storefront data including products, orders, inventory, and discounts.</small>
+        </td>
+        <td>Ecommerce</td>
+        <td>API Key, OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developers.squarespace.com/commerce-apis/authentication-and-permissions" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.squarespace.com/commerce-apis/oauth" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Ecwid</strong>
+            <small>Ecwid is an ecommerce platform offering a REST API for store management, including inventory, orders, and storefront configuration.</small>
+        </td>
+        <td>Ecommerce</td>
+        <td>Bearer Token, OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.ecwid.com/get-started/make-your-first-api-request" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.ecwid.com/develop-apps/app-settings" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Gumroad</strong>
+            <small>Gumroad provides a REST API for managing digital products, subscriptions, sales, and customer data.</small>
+        </td>
+        <td>Ecommerce</td>
+        <td>Bearer Token, OAuth2</td>
+        <td><span class="badge muted">Unknown</span></td>
+        <td>REST, GraphQL</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://apis.io/apis/gumroad/v2-api/" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.n8n.io/integrations/builtin/credentials/gumroad/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Amazon Selling Partner</strong>
+            <small>The Selling Partner API (SP-API) allows developers to programmatically automate selling operations such as order processing and inventory management.</small>
+        </td>
+        <td>Ecommerce</td>
+        <td>OAuth2</td>
+        <td><span class="badge warn">Admin approval</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge warn">READY_WITH_REVIEW</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developer-docs.amazon.com/sp-api/docs/authorizing-selling-partner-api-applications" target="_blank" rel="noopener">source ↗</a> <a href="https://developer-docs.amazon.com/sp-api/docs/onboarding-overview" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>fanbasis</strong>
+            <small>Fanbasis (also known as Commas) provides an API for collecting payments, managing subscriptions, and automating business workflows.</small>
+        </td>
+        <td>Ecommerce</td>
+        <td>API Key</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://www.fanbasis.com/enterprises" target="_blank" rel="noopener">source ↗</a> <a href="https://commasdocs.com/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>DataForSEO</strong>
+            <small>DataForSEO provides a suite of APIs for accessing SEO, marketing, and web scraping data.</small>
+        </td>
+        <td>Data SEO and Scraping</td>
+        <td>Basic Auth</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.dataforseo.com/v3/auth/" target="_blank" rel="noopener">source ↗</a> <a href="https://dataforseo.com/help-center/connecting-the-remote-dataforseo-mcp-server-using-oauth" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>SE Ranking</strong>
+            <small>An SEO platform offering Data and Project APIs for scraping SEO data and automating project management.</small>
+        </td>
+        <td>Data SEO and Scraping</td>
+        <td>API Key</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://seranking.com/api/how-to-get-api/" target="_blank" rel="noopener">source ↗</a> <a href="https://seranking.com/api/data/getting-started/" target="_blank" rel="noopener">source ↗</a> <a href="https://seranking.com/api/project/getting-started/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Ahrefs</strong>
+            <small>An SEO data provider offering programmatic access to marketing, search, and analytics data through API v3.</small>
+        </td>
+        <td>Data SEO and Scraping</td>
+        <td>Bearer Token, OAuth2</td>
+        <td><span class="badge warn">Paid self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge warn">READY_WITH_REVIEW</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://help.ahrefs.com/en/articles/6559232-about-api-v3" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.ahrefs.com/ahrefs-connect/docs/how-it-works" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.ahrefs.com/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>MrScraper</strong>
+            <small>An AI-powered web scraping platform that provides API access for automated data extraction.</small>
+        </td>
+        <td>Data SEO and Scraping</td>
+        <td>API Key</td>
+        <td><span class="badge warn">Paid self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.mrscraper.com/docs/api/authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.mrscraper.com/docs/api/overview" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.mrscraper.com/docs/getting-started/cli" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Apify</strong>
+            <small>A platform for web scraping and automation providing REST API access to actors, storage, and platform settings.</small>
+        </td>
+        <td>Data SEO and Scraping</td>
+        <td>Bearer Token, OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.apify.com/platform/integrations/api" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.apify.com/account/settings" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.apify.com/api" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Firecrawl</strong>
+            <small>A web data extraction platform offering scraping, crawling, and agentic interaction through a REST API.</small>
+        </td>
+        <td>Data SEO and Scraping</td>
+        <td>Bearer Token</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.firecrawl.dev/api-reference/v2-introduction" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.firecrawl.dev/ai-onboarding" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.firecrawl.dev/introduction" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Bright Data</strong>
+            <small>A web data platform providing scraping, proxy services, and search engine data through REST API and SDKs.</small>
+        </td>
+        <td>Data SEO and Scraping</td>
+        <td>Bearer Token, Basic Auth</td>
+        <td><span class="badge warn">Paid self-serve</span></td>
+        <td>REST, SDK</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.brightdata.com/api-reference/authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.brightdata.com/api-reference/rest-api/serp/serp-api" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.brightdata.com/cli/overview" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Sherlock</strong>
+            <small>Sherlock is a platform providing API access for user management, analysis, and data verification.</small>
+        </td>
+        <td>Data SEO and Scraping</td>
+        <td>Bearer Token, API Key</td>
+        <td><span class="badge muted">Unknown</span></td>
+        <td>REST, gRPC</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge warn">Medium</span></td>
+        <td class="source-cell"><a href="https://support.sherlock.im/knowledge_base/item/292200" target="_blank" rel="noopener">source ↗</a> <a href="https://developer.ansys.com/docs/sherlock-apis-2026-r1/sherlock-reference.md" target="_blank" rel="noopener">source ↗</a> <a href="https://support.sherlock.im/knowledge_base/item/292146" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Waterfall.io</strong>
+            <small>Waterfall.io provides an API for finding, enriching, and verifying contact and company data.</small>
+        </td>
+        <td>Data SEO and Scraping</td>
+        <td>API Key</td>
+        <td><span class="badge muted">Partner/contact-sales</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge warn">READY_WITH_REVIEW</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.waterfall.io/v1/authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.waterfall.io/v1/introduction" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.waterfall.io/v1/api-keys-overview" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Clay</strong>
+            <small>Clay offers a developer platform with a CLI and Public API to access data and automation workflows.</small>
+        </td>
+        <td>Data SEO and Scraping</td>
+        <td>API Key</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST, CLI</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developers.clay.com/public-api/authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.clay.com/quickstart" target="_blank" rel="noopener">source ↗</a> <a href="https://university.clay.com/docs/cli-security-privacy" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>GitHub</strong>
+            <small>GitHub provides a comprehensive REST API for managing repositories, issues, and platform integrations.</small>
+        </td>
+        <td>Developer Infra and Data</td>
+        <td>Bearer Token, OAuth2, JWT</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.github.com/en/rest/authentication/authenticating-to-the-rest-api" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.github.com/en/rest/quickstart" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Vercel</strong>
+            <small>Vercel provides a REST API and SDK for managing deployments, infrastructure, and integrations.</small>
+        </td>
+        <td>Developer Infra and Data</td>
+        <td>Bearer Token</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST, SDK</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://vercel.com/docs/rest-api/authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://vercel.com/docs/accounts/access-tokens" target="_blank" rel="noopener">source ↗</a> <a href="https://vercel.com/docs/rest-api/sdk" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Netlify</strong>
+            <small>Netlify offers a REST API for managing site deployments, builds, and platform resources.</small>
+        </td>
+        <td>Developer Infra and Data</td>
+        <td>Bearer Token, OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.netlify.com/api-and-cli-guides/api-guides/get-started-with-api/" target="_blank" rel="noopener">source ↗</a> <a href="https://open-api.netlify.com/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Cloudflare</strong>
+            <small>Cloudflare provides a robust API for managing cloud infrastructure and security configurations.</small>
+        </td>
+        <td>Developer Infra and Data</td>
+        <td>API Key, Bearer Token, OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developers.cloudflare.com/fundamentals/api/get-started/" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.cloudflare.com/fundamentals/api/how-to/make-api-calls/" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.cloudflare.com/fundamentals/oauth/create-an-oauth-client/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Supabase</strong>
+            <small>Supabase provides a backend-as-a-service platform with a management API for projects and organizations.</small>
+        </td>
+        <td>Developer Infra and Data</td>
+        <td>Bearer Token, OAuth2, JWT</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://supabase.com/docs/reference/api/introduction" target="_blank" rel="noopener">source ↗</a> <a href="https://supabase.com/docs/guides/integrations/build-a-supabase-oauth-integration" target="_blank" rel="noopener">source ↗</a> <a href="https://supabase.com/docs/guides/auth/oauth-server" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Neo4j</strong>
+            <small>Neo4j provides a graph database platform with a query API for executing Cypher statements.</small>
+        </td>
+        <td>Developer Infra and Data</td>
+        <td>Basic Auth, Bearer Token</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://neo4j.com/docs/query-api/current/authentication-authorization/" target="_blank" rel="noopener">source ↗</a> <a href="https://neo4j.com/docs/operations-manual/current/authentication-authorization/sso-integration/" target="_blank" rel="noopener">source ↗</a> <a href="https://neo4j.com/docs/java-manual/current/connect-advanced/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Snowflake</strong>
+            <small>Snowflake provides a data cloud platform with a comprehensive SQL REST API for data management.</small>
+        </td>
+        <td>Developer Infra and Data</td>
+        <td>Bearer Token, OAuth2</td>
+        <td><span class="badge good">Trial self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.snowflake.com/en/developer-guide/sql-api" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.snowflake.com/en/en/developer-guide/snowflake-rest-api/authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.snowflake.com/en/en/user-guide/programmatic-access-tokens" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>MongoDB Atlas</strong>
+            <small>MongoDB Atlas provides a managed database service with an Administration API for infrastructure management.</small>
+        </td>
+        <td>Developer Infra and Data</td>
+        <td>Bearer Token, OAuth2, Other</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://www.mongodb.com/docs/api/doc/atlas-admin-api-v2/" target="_blank" rel="noopener">source ↗</a> <a href="https://www.mongodb.com/docs/atlas/configure-api-access" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Datadog</strong>
+            <small>Datadog is a cloud-scale monitoring and analytics platform with a comprehensive REST API.</small>
+        </td>
+        <td>Developer Infra and Data</td>
+        <td>Bearer Token, API Key</td>
+        <td><span class="badge good">Trial self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.datadoghq.com/api/latest/authentication/" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.datadoghq.com/account_management/personal-access-tokens/" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.datadoghq.com/extend/authorization/oauth2_in_datadog.md" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Sentry</strong>
+            <small>Sentry is a developer-first application monitoring platform providing error tracking, performance monitoring, and related telemetry across multiple platforms.</small>
+        </td>
+        <td>Developer Infra and Data</td>
+        <td>Bearer Token, OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.sentry.io/api/auth/" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.sentry.io/api/" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.sentry.io/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Notion</strong>
+            <small>Notion provides an API for interacting with workspace content, databases, and user metadata.</small>
+        </td>
+        <td>Productivity and Project Management</td>
+        <td>Bearer Token, OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developers.notion.com/reference/authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.notion.com/guides/get-started/authorization" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.notion.com/reference/create-a-token" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Airtable</strong>
+            <small>Airtable offers a REST API to manage bases, tables, and records.</small>
+        </td>
+        <td>Productivity and Project Management</td>
+        <td>Bearer Token, OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://airtable.com/developers/web/api/authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://airtable.com/developers/web/api/oauth-reference" target="_blank" rel="noopener">source ↗</a> <a href="https://airtable.com/developers/web/guides/personal-access-tokens" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Linear</strong>
+            <small>Linear is a project management tool offering a GraphQL API for task tracking and team collaboration.</small>
+        </td>
+        <td>Productivity and Project Management</td>
+        <td>Bearer Token</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>GraphQL</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://linear.app/developers/graphql" target="_blank" rel="noopener">source ↗</a> <a href="https://linear.app/developers/oauth-2-0-authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://linear.app/developers/sdk" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Jira</strong>
+            <small>Jira provides a comprehensive REST API for issue tracking and project management tasks.</small>
+        </td>
+        <td>Productivity and Project Management</td>
+        <td>Bearer Token, Basic Auth, JWT</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developer.atlassian.com/cloud/jira/platform/rest/v2/intro/" target="_blank" rel="noopener">source ↗</a> <a href="https://developer.atlassian.com/cloud/jira/platform/security-for-other-integrations/" target="_blank" rel="noopener">source ↗</a> <a href="https://developer.atlassian.com/cloud/jira/software/basic-auth-for-rest-apis/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Asana</strong>
+            <small>Asana provides a RESTful API for project management and task tracking integration.</small>
+        </td>
+        <td>Productivity and Project Management</td>
+        <td>Bearer Token, OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developers.asana.com/docs/authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.asana.com/docs/personal-access-token" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.asana.com/docs/oauth" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Monday.com</strong>
+            <small>Monday.com is an AI work platform that allows users to interact with their workflows, automate processes, and power integrations via a GraphQL API.</small>
+        </td>
+        <td>Productivity and Project Management</td>
+        <td>Bearer Token, OAuth2, JWT</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>GraphQL</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developer.monday.com/api-reference/docs/authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://developer.monday.com/api-reference/docs/getting-started" target="_blank" rel="noopener">source ↗</a> <a href="https://developer.monday.com/apps/docs/oauth" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>ClickUp</strong>
+            <small>ClickUp is a project management platform that provides a public API for building integrations, automations, and custom workflows.</small>
+        </td>
+        <td>Productivity and Project Management</td>
+        <td>Bearer Token, OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developer.clickup.com/docs/authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://developer.clickup.com/reference/getaccesstoken" target="_blank" rel="noopener">source ↗</a> <a href="https://developer.clickup.com/docs/Getting%20Started" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Coda</strong>
+            <small>Coda is a document-based collaboration platform that provides a RESTful API to programmatically read and write data to docs.</small>
+        </td>
+        <td>Productivity and Project Management</td>
+        <td>Bearer Token, OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://coda.io/@oleg/getting-started-guide-coda-api/start-here-5" target="_blank" rel="noopener">source ↗</a> <a href="https://apis.io/security/coda/coda-authentication/" target="_blank" rel="noopener">source ↗</a> <a href="https://apis.io/apis/coda/coda-account-api/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Smartsheet</strong>
+            <small>Smartsheet is a work management and automation platform that offers a comprehensive REST API for data management.</small>
+        </td>
+        <td>Productivity and Project Management</td>
+        <td>Bearer Token, OAuth2</td>
+        <td><span class="badge warn">Paid self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">Unknown</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developers.smartsheet.com/api/smartsheet/guides/basics/authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.smartsheet.com/api/smartsheet/guides/basics/http-and-rest" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.smartsheet.com/api/smartsheet/guides/getting-started" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Harvest</strong>
+            <small>Harvest is a time-tracking and reporting platform that provides a REST API for programmatic access to time, projects, and expenses.</small>
+        </td>
+        <td>Productivity and Project Management</td>
+        <td>Bearer Token, OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">Unknown</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://help.getharvest.com/api-v2/authentication-api/authentication/authentication/" target="_blank" rel="noopener">source ↗</a> <a href="https://help.getharvest.com/api-v2/introduction/overview/general/" target="_blank" rel="noopener">source ↗</a> <a href="https://help.getharvest.com/api-v2/authentication-api/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Stripe</strong>
+            <small>Stripe is a financial infrastructure platform providing a robust set of REST APIs for payments, billing, and financial workflows.</small>
+        </td>
+        <td>Finance and Fintech</td>
+        <td>Basic Auth, Bearer Token, OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">Unknown</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.stripe.com/api/authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.stripe.com/stripe-apps/api-authentication/oauth" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.stripe.com/keys" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Plaid</strong>
+            <small>Plaid is a financial API that allows applications to connect with user bank accounts to access financial data and enable payments.</small>
+        </td>
+        <td>Finance and Fintech</td>
+        <td>OAuth2, Other</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST, SDK</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://plaid.com/docs/api/" target="_blank" rel="noopener">source ↗</a> <a href="https://plaid.com/docs/quickstart/" target="_blank" rel="noopener">source ↗</a> <a href="https://plaid.com/docs/api/oauth/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Binance</strong>
+            <small>Binance provides APIs for accessing exchange data, market information, trading services, and user account data.</small>
+        </td>
+        <td>Finance and Fintech</td>
+        <td>OAuth2, API Key</td>
+        <td><span class="badge warn">Paid self-serve</span></td>
+        <td>REST, WebSocket</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developers.binance.com/docs/" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.binance.com/docs/binance-open-api/apis" target="_blank" rel="noopener">source ↗</a> <a href="https://www.binance.info/en/support/faq/detail/360002502072" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Paygent Connect</strong>
+            <small>Paygent is an SDK for cost tracking and spending limits for LLM integrations.</small>
+        </td>
+        <td>Finance and Fintech</td>
+        <td>Bearer Token</td>
+        <td><span class="badge good">Trial self-serve</span></td>
+        <td>REST, SDK</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.paygent.to/reference/api-reference/" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.paygent.to/getting-started/quickstart/" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.paygent.to/reference/sdk-reference/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>iPayX</strong>
+            <small>iPayX provides payment processing APIs for financial transactions, including credit cards and various payment methods.</small>
+        </td>
+        <td>Finance and Fintech</td>
+        <td>Basic Auth, OAuth2</td>
+        <td><span class="badge warn">Admin approval</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge warn">READY_WITH_REVIEW</span></td>
+        <td><span class="badge warn">Medium</span></td>
+        <td class="source-cell"><a href="https://developers.ipag.com.br/en-us/resources/guide" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.ipag.com.br/en-us/quickstart" target="_blank" rel="noopener">source ↗</a> <a href="https://apidog.com/blog/how-to-use-ipay-api/" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>QuickBooks</strong>
+            <small>QuickBooks Online provides Accounting and Payments APIs for financial management and transaction processing.</small>
+        </td>
+        <td>Finance and Fintech</td>
+        <td>OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developer.intuit.com/app/developer/qbo/docs/develop/authentication-and-authorization/faq" target="_blank" rel="noopener">source ↗</a> <a href="https://developer.intuit.com/app/developer/qbo/docs/get-started/start-developing-your-app" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Xero</strong>
+            <small>Xero provides accounting APIs and an AI toolkit for integrating financial data into applications and AI agents.</small>
+        </td>
+        <td>Finance and Fintech</td>
+        <td>OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST, Other</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developer.xero.com/faq" target="_blank" rel="noopener">source ↗</a> <a href="https://developer.xero.com/faq/oauth2" target="_blank" rel="noopener">source ↗</a> <a href="https://developer.xero.com/custom-development" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Brex</strong>
+            <small>Brex is a financial platform offering corporate cards and business accounts that can be managed programmatically via API.</small>
+        </td>
+        <td>Finance and Fintech</td>
+        <td>Bearer Token, OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developer.brex.com/docs/faq" target="_blank" rel="noopener">source ↗</a> <a href="https://developer.brex.com/docs/mcp" target="_blank" rel="noopener">source ↗</a> <a href="https://developer.brex.com/guides/authentication" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Ramp</strong>
+            <small>Ramp is a corporate card and spend management platform that provides API access for managing financial data and integrations.</small>
+        </td>
+        <td>Finance and Fintech</td>
+        <td>Bearer Token, Basic Auth</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.ramp.com/llms-guides/authorization.txt" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.ramp.com/llms-guides/getting-started.txt" target="_blank" rel="noopener">source ↗</a> <a href="https://router.ramp.com/docs/api/endpoint" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>PitchBook</strong>
+            <small>PitchBook provides a data platform for private and public market intelligence, accessible through API and data feeds.</small>
+        </td>
+        <td>Finance and Fintech</td>
+        <td>Bearer Token</td>
+        <td><span class="badge muted">Partner/contact-sales</span></td>
+        <td>GraphQL, Other</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge warn">READY_WITH_REVIEW</span></td>
+        <td><span class="badge warn">Medium</span></td>
+        <td class="source-cell"><a href="https://mcp-proxy-external.pitchbook.com/" target="_blank" rel="noopener">source ↗</a> <a href="https://developer.pitchly.com/graphql-api" target="_blank" rel="noopener">source ↗</a> <a href="https://pitchbook.com/blog/what-is-direct-data" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>NotebookLM</strong>
+            <small>NotebookLM (now Gemini Notebook) is a document-grounded AI research tool that allows interaction with user sources.</small>
+        </td>
+        <td>AI Research and Media</td>
+        <td>Other</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>Other, REST</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge warn">READY_WITH_REVIEW</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://github.com/teng-lin/notebooklm-py" target="_blank" rel="noopener">source ↗</a> <a href="https://github.com/dandye/notebooklm_sdk" target="_blank" rel="noopener">source ↗</a> <a href="https://github.com/K-dash/nblm-rs/blob/ee8b8667/docs/getting-started/authentication.md" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Otter AI</strong>
+            <small>Otter.ai is an AI-powered meeting transcription and conversational intelligence platform.</small>
+        </td>
+        <td>AI Research and Media</td>
+        <td>Bearer Token, OAuth2</td>
+        <td><span class="badge warn">Paid self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.otterly.ai/mcp-server" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.otterly.ai/authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://apitracker.io/a/otter-ai" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Fathom</strong>
+            <small>Fathom is an AI-powered meeting assistant providing transcripts, summaries, and action items.</small>
+        </td>
+        <td>AI Research and Media</td>
+        <td>Bearer Token, Other</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST, SDK</td>
+        <td><span class="badge muted">Unknown</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developers.fathom.ai/sdks/authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.fathom.ai/api-overview" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.fathom.ai/oauth" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Consensus</strong>
+            <small>Consensus is an AI-powered search engine for peer-reviewed academic research papers that provides an MCP server for AI integrations.</small>
+        </td>
+        <td>AI Research and Media</td>
+        <td>API Key, OAuth2</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST, SDK</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://app.goconsensus.com/api-documentation/" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.consensus.app/docs/mcp" target="_blank" rel="noopener">source ↗</a> <a href="https://support.goconsensus.com/mcp-server-security-information" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Reducto</strong>
+            <small>Reducto is an agentic document platform for parsing, extracting, classifying, and editing documents via API, SDK, and MCP.</small>
+        </td>
+        <td>AI Research and Media</td>
+        <td>Bearer Token</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST, SDK, CLI</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://reducto.ai/developers" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.reducto.ai/sdk/python/overview" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.reducto.ai/agent-guide" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Devin</strong>
+            <small>Devin is an AI platform providing an API to manage sessions, tasks, and knowledge via organizational or enterprise credentials.</small>
+        </td>
+        <td>AI Research and Media</td>
+        <td>Bearer Token</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">Unknown</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.devin.ai/api-reference/authentication" target="_blank" rel="noopener">source ↗</a> <a href="https://docs.devin.ai/api-reference/overview" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Higgsfield</strong>
+            <small>Higgsfield is a generative media platform that provides an asynchronous API for creating images, video, and audio.</small>
+        </td>
+        <td>AI Research and Media</td>
+        <td>API Key</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST, SDK</td>
+        <td><span class="badge good">Yes</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://docs.higgsfield.ai/docs/how-to/introduction" target="_blank" rel="noopener">source ↗</a> <a href="https://higgsfield.ai/creator-hub/help-center/integrations/what-is-higgsfield-mcp" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Mermaid CLI</strong>
+            <small>Mermaid CLI is a tool that converts Mermaid diagram definition files into visual formats like SVG, PNG, and PDF.</small>
+        </td>
+        <td>AI Research and Media</td>
+        <td>Unknown</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>CLI</td>
+        <td><span class="badge muted">Unknown</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge warn">Medium</span></td>
+        <td class="source-cell"><a href="https://github.com/mermaid-js/mermaid-cli" target="_blank" rel="noopener">source ↗</a> <a href="https://mermaid-api.readthedocs.io/en/latest/index.html" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>YouTube Transcript</strong>
+            <small>The YouTube Data API allows developers to retrieve, manage, and download video captions and transcripts.</small>
+        </td>
+        <td>AI Research and Media</td>
+        <td>OAuth2, API Key</td>
+        <td><span class="badge good">Free self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">Unknown</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developers.google.com/youtube/v3/getting-started" target="_blank" rel="noopener">source ↗</a> <a href="https://developers.google.com/youtube/v3/guides/implementation/captions" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+
+    <tr>
+        <td class="app-cell">
+            <strong>Grain</strong>
+            <small>Grain is a platform for managing meeting recordings, transcripts, AI notes, and action items with a public API for developers.</small>
+        </td>
+        <td>AI Research and Media</td>
+        <td>Personal Access Token, Workspace Access Token, OAuth2</td>
+        <td><span class="badge warn">Paid self-serve</span></td>
+        <td>REST</td>
+        <td><span class="badge muted">No</span></td>
+        <td><span class="badge good">READY</span></td>
+        <td><span class="badge good">High</span></td>
+        <td class="source-cell"><a href="https://developers.grain.com/" target="_blank" rel="noopener">source ↗</a> <a href="https://support.grain.com/en/articles/15507288-grain-api" target="_blank" rel="noopener">source ↗</a></td>
+    </tr>
+    
+            </tbody>
+        </table>
+    </div>
+</section>
+
+
+<section class="section">
+    <div class="card">
+        <h2>What this means for Composio</h2>
+
+        <p class="section-sub" style="max-width:900px">
+            The research suggests that the scalable path is not simply finding
+            APIs. The operational bottleneck is deciding which integrations
+            can move directly to implementation, which require access
+            escalation, and which need another evidence pass—particularly
+            around MCP.
+        </p>
+
+        <div class="grid insights" style="margin-top:20px">
+
+            <div class="callout">
+                <h3>Build first</h3>
+                <p>
+                    Public REST/GraphQL + self-serve credentials +
+                    broad surface.
+                </p>
+            </div>
+
+            <div class="callout">
+                <h3>Review</h3>
+                <p>
+                    Ambiguous authentication, incomplete MCP evidence,
+                    or unusual API surfaces.
+                </p>
+            </div>
+
+            <div class="callout warning">
+                <h3>Outreach</h3>
+                <p>
+                    Partner/contact-sales requirements or access controlled
+                    by enterprise/admin approval.
+                </p>
+            </div>
+
+            <div class="callout">
+                <h3>Keep evidence attached</h3>
+                <p>
+                    Every classification should remain traceable to provider
+                    documentation.
+                </p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<footer>
+    <b>AI Product Ops Research Agent</b><br>
+    Evidence-first research · Composio web tools · Gemini classification ·
+    human verification
+</footer>
+
+</div>
+
+</body>
+</html>
